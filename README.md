@@ -33,11 +33,8 @@ All the code has been developed and tested on Linux Ubuntu 16.04 with 410.104  N
 7. Skimage
 8. PyTorch
    
-Run the following script to download required dependencies
-```
-bash setup.sh
-```
-**Method 1** 
+
+<!-- **Method 1** 
 
 Perform object detection for both vehicles and pedestrians. Maintain count when entering, present and moving out of the frame. Assumption is that the traffic flow is in horizontal direction and a zebra crossing is along vertical.
 ```
@@ -51,19 +48,21 @@ To run
 python3 yolo_video.py --input <path-to-video>
 ```
 
-The above generates a video with detection and counts traffic participants. It also generates log file with the time at which they are counted. The computation for object detection is ~0.23s per frame.
+The above generates a video with detection and counts traffic participants. It also generates log file with the time at which they are counted. The computation for object detection is ~0.23s per frame. -->
 
-**Method 2**
+**Method**
 
 Track the traffic participants continuously through the frames for a stable count. The only assumption here is that we know the region of zebra crossing (this can be acheived with a detection pipeline) to detect pedestrians crossing and ignore the rest of the people walking. 
 
+Run the following commands
 ```
 git clone git@github.com:meenakshiravisankar/pytorch_objectdetecttrack.git
-cd pytorch_objectdetecttrack/config
+cd pytorch_objectdetecttrack
+bash setup.sh
+cd config
 bash download_weights.sh
-
 ```
-To run
+To run the script
 ```
 python3 traffic_tracker.py --input <path-to-video> --output(optional) <path-to-video> --activity(optional) <directory-to-save-log>
 ```
