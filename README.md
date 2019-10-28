@@ -17,12 +17,11 @@ The given dataset has 4953 frames at ~10fps with (width,height) = (1280,720)
 - [ ] Find direction of pedestrian crossing 
 
 ### FAILURE CASES
-1. Occluding vehicles
-2. Vehicle is too fast
-3. Sometimes bicycles
+1. Pedestrian on the sidewalk but far
+2. Bicycles and motorcycles - people get detected multiple times
 
 ### USAGE
-All the code has been developed and tested on Linux Ubuntu 16.04 with 410.104  Nvidia driver and Cuda version 10.0 on GeForce GTX 1050
+All the code has been developed and tested on Linux Ubuntu 16.04 with 410.104  Nvidia driver and Cuda version 10.0 on GeForce GTX 1050. Assuming the videos are taken from the same camera facing the same road, similar to the given video. 
 
 **Dependencies**
 1. Opencv (version>3)
@@ -32,14 +31,14 @@ All the code has been developed and tested on Linux Ubuntu 16.04 with 410.104  N
 5. Tesseract-ocr
 6. Numba
 7. Skimage
+8. PyTorch
    
-Install tesseract for OCR
+Run the following script to download required dependencies
 ```
-sudo add-apt-repository ppa:alex-p/tesseract-ocr
-sudo apt-get update
-sudo apt install tesseract-ocr libtesseract-dev
+bash setup.sh
 ```
-**Method 1**
+**Method 1** 
+
 Perform object detection for both vehicles and pedestrians. Maintain count when entering, present and moving out of the frame. Assumption is that the traffic flow is in horizontal direction and a zebra crossing is along vertical.
 ```
 git clone git@github.com:meenakshiravisankar/keras-yolo3.git
@@ -55,6 +54,7 @@ python3 yolo_video.py --input <path-to-video>
 The above generates a video with detection and counts traffic participants. It also generates log file with the time at which they are counted. The computation for object detection is ~0.23s per frame.
 
 **Method 2**
+
 Track the traffic participants continuously through the frames for a stable count. The only assumption here is that we know the region of zebra crossing (this can be acheived with a detection pipeline) to detect pedestrians crossing and ignore the rest of the people walking. 
 
 ```
@@ -63,8 +63,10 @@ cd pytorch_objectdetecttrack/config
 bash download_weights.sh
 
 ```
-
-
+To run
+```
+python3 traffic_tracker.py --input <path-to-video> --output(optional) <path-to-video> --activity(optional) <directory-to-save-log>
+```
 ### CREDITS
 1. Yolov3 - [link](https://github.com/pjreddie/darknet)
 2. Keras-yolo3 - [link](https://github.com/meenakshiravisankar/keras-yolo3)
