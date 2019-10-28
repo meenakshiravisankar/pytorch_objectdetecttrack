@@ -1,3 +1,75 @@
+# TRAFFIC ANALYSIS WITH TRAFFIC CAMERA
+
+1. Vehicles count for each lane
+2. Pedestrians in either direction
+3. Video time of entry of road user
+
+The given dataset has 4953 frames at ~10fps with (width,height) = (1280,720)
+
+### TODO
+- [x] Extract images from video
+- [x] Detect all types of vehicles in the video
+- [x] Counting vehicles
+- [x] Pedestrian detection
+- [x] Track pedestrians over crossing and count them
+- [x] Stabilize the count of vehicles
+- [ ] Add time information
+- [ ] Find direction of pedestrian crossing 
+
+### FAILURE CASES
+1. Occluding vehicles
+2. Vehicle is too fast
+3. Sometimes bicycles
+
+### USAGE
+All the code has been developed and tested on Linux Ubuntu 16.04 with 410.104  Nvidia driver and Cuda version 10.0 on GeForce GTX 1050
+
+**Dependencies**
+1. Opencv (version>3)
+2. Keras
+3. Tensorflow gpu (version<2)
+4. Numpy
+5. Tesseract-ocr
+6. Numba
+7. Skimage
+   
+Install tesseract for OCR
+```
+sudo add-apt-repository ppa:alex-p/tesseract-ocr
+sudo apt-get update
+sudo apt install tesseract-ocr libtesseract-dev
+```
+**Method 1**
+Perform object detection for both vehicles and pedestrians. Maintain count when entering, present and moving out of the frame. Assumption is that the traffic flow is in horizontal direction and a zebra crossing is along vertical.
+```
+git clone git@github.com:meenakshiravisankar/keras-yolo3.git
+cd keras-yolo3
+wget https://pjreddie.com/media/files/yolov3.weights
+python3 convert.py yolov3.cfg yolov3.weights model_data/yolo.h5
+```
+To run
+```
+python3 yolo_video.py --input <path-to-video>
+```
+
+The above generates a video with detection and counts traffic participants. It also generates log file with the time at which they are counted. The computation for object detection is ~0.23s per frame.
+
+**Method 2**
+Track the traffic participants continuously through the frames for a stable count. The only assumption here is that we know the region of zebra crossing (this can be acheived with a detection pipeline) to detect pedestrians crossing and ignore the rest of the people walking. 
+
+```
+git clone git@github.com:meenakshiravisankar/pytorch_objectdetecttrack.git
+cd pytorch_objectdetecttrack/config
+bash download_weights.sh
+
+```
+
+
+### CREDITS
+1. Yolov3 - [link](https://github.com/pjreddie/darknet)
+2. Keras-yolo3 - [link](https://github.com/meenakshiravisankar/keras-yolo3)
+3. Pytorch tracking with yolo3 - [link](https://github.com/cfotache/pytorch_objectdetecttrack)
+   
 <!-- Original Readme.md -->
 <!-- # PyTorch Object Detection and Tracking
 Object detection in images, and tracking across video frames
