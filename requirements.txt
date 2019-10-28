@@ -1,0 +1,11 @@
+numpy
+tensorflow-gpu==1.14
+opencv-python
+keras
+tesseract 
+numba
+scikit-image
+filterpy
+pytesseract
+torch
+torchvision
