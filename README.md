@@ -68,6 +68,7 @@ python3 traffic_tracker.py --input <path-to-video> --output(optional) <path-to-v
 Sample output for 1-minute part of the given video [link](https://drive.google.com/drive/u/0/folders/1EvyrX95d45pJ1S4GusAXUXJ2FJIJFjlf)
 
 **Directory Structure**
+
 | Path | Description
 | :--- | :----------
 | &nbsp; **pytorch_objectdetecttrack** | Main folder
