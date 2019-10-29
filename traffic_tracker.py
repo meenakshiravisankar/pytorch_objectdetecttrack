@@ -1,5 +1,3 @@
-import pytesseract
-# from driver import *
 from utils.utils import *
 from utils import *
 from models import *
@@ -13,21 +11,29 @@ from torchvision import datasets, transforms
 from torch.autograd import Variable
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+from tempfile import TemporaryFile
 
 from PIL import Image
 import cv2
+import pytesseract
 
 def get_videotime(frame) :
     """
     Crops the time-in-video and returns the timestamp
 
+    Parameters
+    ----------
+    frame - image frame
+    
+    Returns
+    -------
+    text - timestamp present on the image 
+
     """
     # Crop the time portion
     frame = frame[0:25,0:220]
     # perform ocr
-    text = "dummy"
-    # text = pytesseract.image_to_string(frame)  
+    text = pytesseract.image_to_string(frame)  
     return text
 
 def detect_image(img):
@@ -99,6 +105,7 @@ if __name__ == '__main__':
     model.load_weights(weights_path)
     model.cuda()
     model.eval()
+    
     classes = load_classes(class_path)
     Tensor = torch.cuda.FloatTensor
 
@@ -115,14 +122,14 @@ if __name__ == '__main__':
 
     current_pedestrians = 0
     total_pedestrians = 0
+    total_left_pedestrians = 0
+    total_right_pedestrians = 0
 
-    activity_log = np.array([])
+    activity_log = np.array(['Class', 'ID', 'Left', 'Top', 'Right', 'Bottom', 'Time'])
     save_log_time = 0
 
     vehicle_classes = [2,3,5,7]
     pedestrian_classes = [0]
-
-    
 
     participants_id = []
 
@@ -134,7 +141,7 @@ if __name__ == '__main__':
                         int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     isOutput = True if output_path != "" else False
     if isOutput:
-        print("!!! TYPE:", type(output_path), type(video_FourCC), type(video_fps), type(video_size))
+        # print("!!! TYPE:", type(output_path), type(video_FourCC), type(video_fps), type(video_size))
         out = cv2.VideoWriter(output_path, video_FourCC, video_fps, video_size)
 
     while(True):
@@ -165,7 +172,7 @@ if __name__ == '__main__':
             height = img.shape[0]
             width = img.shape[1]
             # for pedestrians
-            req_height = int(height/2)-140
+            req_height = int(height/2)-120
 
             current_vehicles = vehicle_labels.shape[0]
             current_pedestrians = pedestrian_labels.shape[0]
@@ -192,7 +199,7 @@ if __name__ == '__main__':
                         total_left_vehicles+=1
                     else :
                         total_right_vehicles+=1
-                    vehicle = np.array([x1,y1,x1+box_w,y1+box_h,time_in_video])   
+                    vehicle = np.array([cls, total_left_vehicles+total_right_vehicles ,x1,y1,x1+box_w,y1+box_h,time_in_video])   
                     activity_log = np.append(activity_log, vehicle)
                 
                 cv2.putText(frame, cls, 
@@ -214,8 +221,12 @@ if __name__ == '__main__':
                 if row > req_height :  
                     if obj_id not in participants_id :
                         participants_id.append(obj_id)
-                        total_pedestrians+=1
-                        pedestrian = np.array([x1,y1,x1+box_w,y1+box_h,time_in_video])   
+                        if row > height/2 :
+                            total_right_pedestrians+=1
+                        else :
+                            total_left_pedestrians+=1
+
+                        pedestrian = np.array([cls,total_left_pedestrians+total_right_pedestrians,x1,y1,x1+box_w,y1+box_h,time_in_video])   
                         activity_log = np.append(activity_log, pedestrian)
                     
                     cv2.rectangle(frame, (x1, y1), (x1+box_w, y1+box_h),
@@ -239,8 +250,9 @@ if __name__ == '__main__':
 
         cv2.putText(img,'Pedestrians',(5,160), font, font_size,(255,255,255),2,8)
         # cv2.putText(img,'Current Frame : '+str(current_pedestrians),(5,180), font, font_size,(255,255,255),2,cv2.LINE_AA)
-        cv2.putText(img,'Total   : '+str(total_pedestrians),(5,200), font, font_size,(255,255,255),2,cv2.LINE_AA)
-        # cv2.putText(img,'Total   : '+str(total_pedestrians),(5,240), font, font_size,(255,255,255),2,cv2.LINE_AA)
+        # cv2.putText(img,'Total   : '+str(total_pedestrians),(5,200), font, font_size,(255,255,255),2,cv2.LINE_AA)
+        cv2.putText(img,'Crossing left   : '+str(total_left_pedestrians),(5,200), font, font_size,(255,255,255),2,cv2.LINE_AA)
+        cv2.putText(img,'Crossing right   : '+str(total_right_pedestrians),(5,240), font, font_size,(255,255,255),2,cv2.LINE_AA)
         
         frame = np.array(frame)
         frame[0:size,width-size:width] = img
@@ -252,8 +264,9 @@ if __name__ == '__main__':
             if not os.path.exists(activity_log_path) :
                 os.makedirs(activity_log_path)
             if(save_log_time%100) :
-                activity_log = np.array(activity_log)
-                np.savetxt(os.path.join(activity_log_path,"log.txt"), activity_log, fmt="%s")
+                activity_log = np.array(activity_log).reshape(-1,7)
+                path_to_save = os.path.join(activity_log_path,"log")
+                np.save(path_to_save, activity_log)
             save_log_time+=1
 
         if isOutput:
