@@ -63,6 +63,21 @@ To run the script
 ```
 python3 traffic_tracker.py --input <path-to-video> --output(optional) <path-to-video> --activity(optional) <directory-to-save-log>
 ```
+**Sample Output Video**
+
+Sample output for 1-minute part of the given video [link](https://drive.google.com/drive/u/0/folders/1EvyrX95d45pJ1S4GusAXUXJ2FJIJFjlf)
+
+**Directory Structure**
+| Path | Description
+| :--- | :----------
+| &nbsp; **pytorch_objectdetecttrack** | Main folder
+| &boxvr;&nbsp; subfolders & files | Tracker files
+| &nbsp; **files** | Data folder
+| &boxvr;&nbsp; results | Contains results
+| &boxvr;&nbsp; videos | Contains input video
+| &nbsp; &boxvr;&nbsp;  1569843500.mp4 | Given video
+| &nbsp; &boxvr;&nbsp;  raw60.mp4| 1 min video
+
 
 ### FAILURE CASES
 1. Pedestrian on the sidewalk but far interferes with the counting
